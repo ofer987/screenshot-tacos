@@ -80,12 +80,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func actionSelectArea(_sender: Any?) {
-    }
-
-    @objc private func captureEntireScreen(_sender: Any?) {
+        ScreenCaptureUtil.screenshot(type: .ScreenArea)
     }
 
     @objc private func actionCaptureWindow(_sender: Any?) {
+        ScreenCaptureUtil.screenshot(type: .EntireWindow)
+    }
+
+    @objc private func captureEntireScreen(_sender: Any?) {
+        ScreenCaptureUtil.screenshot(type: .Screen)
     }
 
     @objc private func actionQuitApp(_sender: Any?) {
