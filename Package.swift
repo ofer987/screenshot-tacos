@@ -2,14 +2,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "WindowlessScreenShotApp",
-    platforms: [.macOS(.v13)],
-    dependencies: [],
-    targets: [
-        .executableTarget(
-            name: "WindowlessScreenShotApp",
-            dependencies: [],
-            path: "WindowlessScreenShotApp"
-        )
-    ]
+  name: "Kraven in the Safari",
+  platforms: [.macOS(.v13)],
+  dependencies: [],
+  targets: [
+    .executableTarget(
+      name: "Kraven",
+      dependencies: [],
+      path: "Kraven"
+    )
+  ]
 )

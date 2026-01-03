@@ -1,6 +1,6 @@
 //
 //  AppDelegate.swift
-//  WindowlessScreenShotApp
+//  Kraven
 //
 //  Created by Dan Ofer on 2025-12-26.
 //
