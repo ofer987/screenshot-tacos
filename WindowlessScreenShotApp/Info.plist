@@ -4,5 +4,7 @@
 <dict>
 	<key>NSScreenCaptureUsageDescription</key>
 	<string>This app needs permission to capture screenshots.</string>
+	<key>NSAccessibilityUsageDescription</key>
+	<string>This app needs accessibility permissions to register global keyboard shortcuts and control Safari.</string>
 </dict>
 </plist>

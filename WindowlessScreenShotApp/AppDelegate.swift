@@ -9,6 +9,7 @@ import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
   var statusBarItem: NSStatusItem?
+  @State var eventMonitor: Any?
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     statusBarItem = NSStatusBar.system
@@ -63,6 +64,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     itemCaptureWindow.target = self
     mainMenu.addItem(itemCaptureWindow)
 
+    // Creating menu item: Pin/Unpin Tab
+    let itemPinTab = NSMenuItem(
+      title: "Pin/Unpin Current Tab",
+      action: #selector(togglePinTab),
+      keyEquivalent: ""
+    )
+    itemPinTab.image = NSImage(
+      systemSymbolName: "pin",
+      accessibilityDescription: "Pin/Unpin Tab"
+    )
+    itemPinTab.target = self
+    mainMenu.addItem(itemPinTab)
+
     // Creating menu item: Create a Divider
     mainMenu.addItem(.separator())
 
@@ -77,10 +91,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     mainMenu.addItem(itemQuit)
 
     statusBarItem?.menu = mainMenu
+
+    // Setup global keyboard monitoring
+    setupKeyboardMonitoring()
+  }
+
+  func setupKeyboardMonitoring() {
+    // Monitor for global keyboard events
+    self.eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [self] event in
+      print("key is \(event.keyCode)")
+      if event.modifierFlags.contains([.option, .shift]) && event.keyCode == 35 {
+        runAutomatorWorkflow(
+          at: #"Pin Tab"#)
+      }
+
+      if event.modifierFlags.contains([.option, .shift]) && event.keyCode == 4 {
+        runAutomatorWorkflow(
+          at: #"Move Safari Tab to the Left"#)
+      }
+
+      // Check for Cmd+Shift+Right Arrow (Move tab right)
+      if event.modifierFlags.contains([.option, .shift]) && event.keyCode == 37 {
+        runAutomatorWorkflow(
+          at: #"Move Safari Tab to the Right"#)
+      }
+    }
   }
 
   func runAutomatorWorkflow(at path: String, withInput input: Any? = nil) {
-    let url = URL(fileURLWithPath: path)
+    guard let url = Bundle.main.url(forResource: path, withExtension: "workflow") else {
+      print("Failed to find '\(path).workflow'")
+      return
+    }
 
     let task = Process()
     task.launchPath = "/usr/bin/automator"
@@ -98,22 +140,50 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     task.waitUntilExit()
   }
 
+  func executeAppleScript(_ script: String) -> Bool {
+    guard let appleScript = NSAppleScript(source: script) else {
+      print("Failed to create AppleScript")
+      return false
+    }
+
+    var error: NSDictionary?
+    appleScript.executeAndReturnError(&error)
+
+    if let error = error {
+      print("AppleScript Error: \(error)")
+      return false
+    }
+
+    return true
+  }
+
   @objc private func moveTabToTheLeft(_sender: Any?) {
     runAutomatorWorkflow(
-      at: #"/Users/ofer987/Library/Services/Move Safari Tab to the Left.workflow"#)
+      at: #"Move Safari Tab to the Left"#)
   }
 
   @objc private func moveTabToTheRight(_sender: Any?) {
     runAutomatorWorkflow(
-      at: #"/Users/ofer987/Library/Services/Move Safari Tab to the Right.workflow"#)
+      at: #"Move Safari Tab to the Right"#)
   }
 
   @objc private func captureEntireScreen(_sender: Any?) {
     ScreenCaptureUtil.screenshot(type: .Screen)
   }
 
+  @objc private func togglePinTab(_sender: Any?) {
+    runAutomatorWorkflow(
+      at: #"Pin Tab"#)
+  }
+
   @objc private func actionQuitApp(_sender: Any?) {
     NSApp.terminate(self)
+  }
+
+  deinit {
+    if let monitor = eventMonitor {
+      NSEvent.removeMonitor(monitor)
+    }
   }
 
 }
